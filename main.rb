@@ -1,8 +1,15 @@
+require_relative './Command'
+require './CreateFileCommand'
+
 require 'test/unit'
 
-require 'CreateFileCommand'
-require 'Command'
+class TestCommands < Test::Unit::TestCase
+    def setup
+        puts("Starting new test")
+    end
 
-class testCommands < Test::Unit::TestCase
-
+    def test_create_new_file
+        c = CreateFileCommand.new(".", "Hello World")
+        c.execute
+    end
 end
