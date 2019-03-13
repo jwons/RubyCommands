@@ -1,0 +1,3 @@
+class CreateFileCommand < Command
+
+end
