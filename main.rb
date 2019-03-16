@@ -4,16 +4,22 @@ require_relative 'RenameFileCommand'
 require_relative 'CopyFileCommand'
 require_relative 'MoveFileCommand'
 require_relative 'DeleteFileCommand'
+require_relative 'CreateDirCommand'
+
 
 require 'test/unit'
 
 class TestCommands < Test::Unit::TestCase
     attr_accessor(:fileName)
     attr_accessor(:newName)
+    attr_accessor(:dirName)
+    attr_accessor(:newDir)
     def setup
         puts("Starting new test")
         self.fileName="./testData/test.txt"
         self.newName="./testData/newTest.txt"
+        self.dirName="./testData/dir"
+        self.newDir="./testData/newDir"
     end
 
     def test_create_new_file
@@ -150,16 +156,41 @@ class TestCommands < Test::Unit::TestCase
 
         c = DeleteFileCommand.new(@fileName)
         c.execute
-
         assert_equal(false, File.exist?(@fileName))
 
         c.undo
-
         assert_equal(true, File.exist?(@fileName))
 
         newLines = File::readlines(@fileName)
         assert_equal(ogLines, newLines)
 
         File::delete(@fileName)
+    end
+
+    def test_delete_order
+        File::open(@fileName, "w+") {|f| f.write("Hello World\n")}
+
+        c = DeleteFileCommand.new(@fileName)
+        c.hasExecuted=true
+        c.execute
+
+        assert_equal(true, File.exist?(@fileName))
+
+        File::delete(@fileName)
+
+        c.hasExecuted=false
+        c.undo
+
+        assert_equal(false, File.exist?(@fileName))
+    end
+
+    def test_create_directory
+        c = CreateDirCommand.new(@dirName)
+
+        c.execute
+        assert_equal(true, File::directory?(@dirName))
+
+        c.undo
+        assert_equal(false, File::directory?(@dirName))
     end
 end
