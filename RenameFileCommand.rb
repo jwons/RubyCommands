@@ -6,10 +6,9 @@ class RenameFileCommand < Command
     attr_accessor(:newName)
 
     def initialize(path, nn)
+        super("This command takes a filename and a new name, and will rename the file to the new name.")
         self.filepath=path
         self.newName=nn
-        self.description= "This command takes a filename and a new name, and will rename the file to the new name."
-        self.hasExecuted=false
     end
 
     def execute

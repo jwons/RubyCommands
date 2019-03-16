@@ -2,6 +2,8 @@ require_relative 'Command'
 require_relative 'CreateFileCommand'
 require_relative 'RenameFileCommand'
 require_relative 'CopyFileCommand'
+require_relative 'MoveFileCommand'
+require_relative 'DeleteFileCommand'
 
 require 'test/unit'
 
@@ -102,6 +104,62 @@ class TestCommands < Test::Unit::TestCase
         assert_equal(true, File.exist?(@fileName))
         assert_equal(false, File.exist?(@newName))
         
+        File::delete(@fileName)
+    end
+
+    def test_move_file
+        File::open(@fileName, "w+") {|f| f.write("Hello World\n")}
+
+        c = MoveFileCommand.new(@fileName, @newName)
+
+        c.execute
+        assert_equal(false, File.exist?(@fileName))
+        assert_equal(true, File.exist?(@newName))
+
+        c.undo
+
+        assert_equal(true, File.exist?(@fileName))
+        assert_equal(false, File.exist?(@newName))
+
+        File::delete(@fileName)
+    end
+
+    def test_move_order
+        File::open(@newName, "w+") {|f| f.write("Hello World\n")}
+
+        c = MoveFileCommand.new(@fileName, @newName)
+
+        c.undo
+        assert_equal(false, File.exist?(@fileName))
+        assert_equal(true, File.exist?(@newName))
+
+        c.hasExecuted=true
+        File.rename(@newName, @fileName)
+
+        c.execute
+        assert_equal(true, File.exist?(@fileName))
+        assert_equal(false, File.exist?(@newName))
+
+        File::delete(@fileName)
+    end
+
+    def test_delete_file
+        File::open(@fileName, "w+") {|f| f.write("Hello World\n")}
+
+        ogLines = File::readlines(@fileName)
+
+        c = DeleteFileCommand.new(@fileName)
+        c.execute
+
+        assert_equal(false, File.exist?(@fileName))
+
+        c.undo
+
+        assert_equal(true, File.exist?(@fileName))
+
+        newLines = File::readlines(@fileName)
+        assert_equal(ogLines, newLines)
+
         File::delete(@fileName)
     end
 end

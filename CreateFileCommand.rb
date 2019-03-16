@@ -5,10 +5,9 @@ class CreateFileCommand < Command
     attr_accessor(:fileContents)
     attr_accessor(:filepath)
     def initialize(path, contents)
+        super("This command takes a filename and file contents, and creates that file.")
         self.fileContents=contents
         self.filepath=path
-        self.description="This command takes a filename and file contents, and creates that file."
-        self.hasExecuted=false
     end
 
     def execute
