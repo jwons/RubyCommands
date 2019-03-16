@@ -5,6 +5,7 @@ require_relative 'CopyFileCommand'
 require_relative 'MoveFileCommand'
 require_relative 'DeleteFileCommand'
 require_relative 'CreateDirCommand'
+require_relative 'RenameDirCommand'
 
 
 require 'test/unit'
@@ -31,7 +32,7 @@ class TestCommands < Test::Unit::TestCase
         assert_equal(false, File.exist?(@fileName))
     end
 
-    def test_new_file_execute_undo_order
+    def test_create_file_order
         c = CreateFileCommand.new(@fileName, "Hello World\n")
 
         #Ensure execute can only be called if it hasn't already been called or undone first
@@ -193,4 +194,49 @@ class TestCommands < Test::Unit::TestCase
         c.undo
         assert_equal(false, File::directory?(@dirName))
     end
+
+    def test_create_dir_order
+        c = CreateDirCommand.new(@dirName)
+        Dir::mkdir(@dirName)
+
+        c.undo
+        assert_equal(true, File::directory?(@dirName))
+
+        Dir::delete(@dirName)
+        c.hasExecuted=true
+
+        c.execute
+        assert_equal(false, File::directory?(@dirName))
+    end
+
+    def test_rename_directory
+        Dir::mkdir(@dirName)
+        c = RenameDirCommand.new(@dirName, @newDir)
+
+        c.execute
+        assert_equal(true, File::directory?(@newDir))
+
+        c.undo
+        assert_equal(true, File::directory?(@dirName))
+
+        Dir::delete(@dirName)
+    end
+
+    def test_rename_directory_order
+        Dir::mkdir(@newDir)
+        c = RenameDirCommand.new(@dirName, @newDir)
+
+        c.undo
+        assert_equal(true, File::directory?(@newDir))
+
+        File::rename(@newDir, @dirName)
+        c.hasExecuted=true
+        c.execute
+
+        assert_equal(true, File::directory?(@dirName))
+
+        Dir::delete(@dirName)
+    end
+
+    
 end

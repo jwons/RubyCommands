@@ -1,26 +1,26 @@
 require_relative 'Command'
 require 'fileutils'
 
-class RenameFileCommand < Command
-    attr_accessor(:filepath)
+class RenameDirCommand < Command
+    attr_accessor(:oldDir)
     attr_accessor(:newName)
 
-    def initialize(path, nn)
+    def initialize(od, nn)
         super("This command takes a filename and a new name, and will rename the file to the new name.")
-        self.filepath=path
+        self.oldDir=od
         self.newName=nn
     end
 
     def execute
-        if(File.exist?(@filepath) and @hasExecuted == false)
-            File.rename(@filepath, @newName)
+        if(File.directory?(@oldDir) and @hasExecuted == false)
+            File.rename(@oldDir, @newName)
             @hasExecuted=true
         end
     end
 
     def undo
         if(File.exist?(@newName) and @hasExecuted == true)
-            File.rename(@newName, @filepath)
+            File.rename(@newName, @oldDir)
             @hasExecuted=false
         end
     end
