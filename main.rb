@@ -8,6 +8,7 @@ require_relative 'CreateDirCommand'
 require_relative 'RenameDirCommand'
 require_relative 'CopyDirCommand'
 require_relative 'MoveDirCommand'
+require_relative 'DeleteDirCommand'
 
 require 'test/unit'
 
@@ -312,4 +313,32 @@ class TestCommands < Test::Unit::TestCase
         FileUtils::rm_r(@dirName)
     end
 
+    def test_delete_directory
+        Dir::mkdir(@dirName)
+
+        c = DeleteDirCommand.new(@dirName)
+
+        c.execute
+        assert_equal(false, File::directory?(@dirName))
+
+        c.undo
+        assert_equal(true, File::directory?(@dirName))
+
+        Dir::delete(@dirName)
+    end
+
+    def test_delete_directory_order
+        Dir::mkdir(@dirName)
+
+        c = DeleteDirCommand.new(@dirName)
+
+        c.hasExecuted=true
+        c.execute
+        assert_equal(true, File::directory?(@dirName))
+
+        Dir::delete(@dirName)
+        c.hasExecuted=false
+        c.undo
+        assert_equal(false, File::directory?(@dirName))
+    end
 end
