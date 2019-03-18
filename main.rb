@@ -9,6 +9,7 @@ require_relative 'RenameDirCommand'
 require_relative 'CopyDirCommand'
 require_relative 'MoveDirCommand'
 require_relative 'DeleteDirCommand'
+require_relative 'CompositeCommand'
 
 require 'test/unit'
 
@@ -23,6 +24,11 @@ class TestCommands < Test::Unit::TestCase
         self.newName="./testData/newTest.txt"
         self.dirName="./testData/dir"
         self.newDir="./testData/newDir"
+    end
+
+    def teardown
+        FileUtils::rm_r("./testData")
+        Dir::mkdir("./testData")
     end
 
     def test_create_new_file
@@ -341,4 +347,58 @@ class TestCommands < Test::Unit::TestCase
         c.undo
         assert_equal(false, File::directory?(@dirName))
     end
+
+    def test_composite_commands
+        cc = CompositeCommand.new
+
+        cc.addCommand(CreateFileCommand.new(@fileName, "Hello World!"))
+        cc.addCommand(MoveFileCommand.new(@fileName, @newName))
+        cc.addCommand(DeleteFileCommand.new(@newName))
+
+        cc.execute
+        assert_equal(cc.commandIndex, (cc.commands.length()))
+
+        cc.undo
+        assert_equal(cc.commandIndex, 0)
+
+        cc.stepForward(1)
+        assert_equal(cc.commandIndex, 1)
+
+        cc.stepBackward(1)
+        assert_equal(cc.commandIndex, 0)
+
+        cc.stepForward(5)
+        assert_equal(cc.commandIndex, 0)
+
+        cc.stepForward(2)
+        assert_equal(cc.commandIndex, 2)
+
+        cc.stepBackward(5)
+        assert_equal(cc.commandIndex, 2)
+
+        cc.undo
+        assert_equal(cc.commandIndex, 0)
+    end
+
+    def test_composite_with_composite
+        cc1 = CompositeCommand.new
+
+        cc1.addCommand(CreateFileCommand.new(@fileName, "Hello World!"))
+        cc1.addCommand(MoveFileCommand.new(@fileName, @newName))
+
+        cc2 = CompositeCommand.new
+        cc2.addCommand(cc1)
+        cc2.addCommand(CopyFileCommand.new(@newName, @fileName))
+
+        cc2.execute
+
+        assert_equal(true, File.exist?(@fileName))
+        assert_equal(true, File.exist?(@newName))
+
+        cc2.undo
+
+        assert_equal(false, File.exist?(@fileName))
+        assert_equal(false, File.exist?(@newName))
+    end
+
 end

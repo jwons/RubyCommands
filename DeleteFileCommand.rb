@@ -7,11 +7,12 @@ class DeleteFileCommand < Command
     def initialize(n)
         super("This command deletes a given file")
         self.fileName=n
-        self.contents= File::readlines(n)
+        self.contents=""
     end
 
     def execute
         if(@hasExecuted == false and File::exist?(@fileName))
+            self.contents=File::readlines(@fileName)
             File::delete(@fileName)
             @hasExecuted=true
         end
