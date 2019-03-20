@@ -10,6 +10,7 @@ class CopyFileCommand < Command
         self.newPath=n
     end
 
+    # This method copies a file to a new position if it has not already been done
     def execute
         if(@hasExecuted==false and (not File::exist?(@newPath)))
             FileUtils.cp(@ogPath, @newPath)
@@ -17,6 +18,7 @@ class CopyFileCommand < Command
         end
     end
 
+    # This method removes a copied file if it has not already been undone
     def undo 
         if(@hasExecuted==true and (File::exist?(@newPath)))
             File::delete(@newPath)

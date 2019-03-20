@@ -10,6 +10,9 @@ class MoveFileCommand < Command
         self.newPath=n
     end
 
+    # This method will copy the chosen file to a new location and then
+    # remove the old, therefore "moving" it. But only if it has not already been moved
+    # and executed
     def execute 
         if(@hasExecuted==false and (not File::exist?(@newPath)))
             FileUtils.cp(@ogPath, @newPath)
@@ -18,6 +21,8 @@ class MoveFileCommand < Command
         end
     end
 
+    # This method will copy the new file to the original location and then
+    # remove the new, therefore "moving" it back into place. Must call 'execute' first
     def undo 
         if(@hasExecuted==true and (File::exist?(@newPath)))
             FileUtils.cp(@newPath, @ogPath)

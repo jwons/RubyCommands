@@ -8,6 +8,8 @@ class CreateDirCommand < Command
         self.dir=n
     end
 
+    # This method creates a directory so long as the command already has not been executed and
+    # the directory does not already exist
     def execute
         if((not File::directory?(@dir)) and (@hasExecuted == false))
             Dir::mkdir(@dir)
@@ -15,6 +17,8 @@ class CreateDirCommand < Command
         end
     end
 
+    # This method deletes the directory so long as the command already has not been undone and
+    # the directory has not already been deleted
     def undo
         if(File::directory?(@dir) and @hasExecuted == true)
             Dir::delete(@dir)

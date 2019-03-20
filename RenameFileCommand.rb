@@ -11,6 +11,7 @@ class RenameFileCommand < Command
         self.newName=nn
     end
 
+    # This method will rename a chosen file if it has not already been renamed
     def execute
         if(File.exist?(@filepath) and @hasExecuted == false)
             File.rename(@filepath, @newName)
@@ -18,6 +19,8 @@ class RenameFileCommand < Command
         end
     end
 
+    # This method will change the directory back to its original name if 
+    # it has not already been undone. 
     def undo
         if(File.exist?(@newName) and @hasExecuted == true)
             File.rename(@newName, @filepath)
