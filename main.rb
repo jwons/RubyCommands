@@ -375,6 +375,27 @@ class TestCommands < Test::Unit::TestCase
         assert_equal(false, File::directory?(@dirName))
     end
 
+    # This tests to make sure a directory can be deleted and undone 
+    def test_deleting_dir_with_contents
+        Dir::mkdir(@dirName)
+        Dir::mkdir("./testData/dir/moreDirs")
+        File::open("./testData/dir/test.txt", "w+") {|f| f.write("Hello World\n")}
+        File::open("./testData/dir/test2.txt", "w+") {|f| f.write("Hello World again\n")}
+        File::open("./testData/dir/moreDirs/test3.txt", "w+") {|f| f.write("Hello World!!!\n")}
+
+        c = DeleteDirCommand.new(@dirName)
+        
+        c.execute
+        assert_equal(false, File::directory?(@dirName))
+
+        c.undo
+        assert_equal(true, File::directory?(@dirName))
+        assert_equal(true, File::directory?("./testData/dir/moreDirs"))
+        assert_equal(true, File::exist?("./testData/dir/test.txt"))
+        assert_equal(true, File::exist?("./testData/dir/test2.txt"))
+        assert_equal(true, File::exist?("./testData/dir/moreDirs/test3.txt"))
+    end
+
     # This composite command creates moves and deletes files
     # It tests the stepping forward and backward by checking the index
     # into the array of commands. It also checks to make sure the 
