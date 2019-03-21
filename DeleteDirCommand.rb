@@ -1,29 +1,14 @@
-require_relative 'Command'
+require_relative 'MoveDirCommand'
 require 'fileutils'
 
-class DeleteDirCommand < Command
-    attr_accessor(:fileName)
-
+# This "Delete" command works similar to how something is 'deleted' on a OS like MacOS or Windows
+# rather than straight 'rm'ing it from existence, it is moved to the trash. In this case, the 
+# trash is a hidden directory with the same name. Because it is being moved to the trash, this 
+# inherits from the Move dir class, since that is what 'delete' is doing. 
+class DeleteDirCommand < MoveDirCommand
     def initialize(n)
-        super("This command deletes a given directory")
-        self.fileName=n
-    end
-
-    # This method will delete the chosen directory if the directory exists
-    # and the command has not already been executed
-    def execute
-        if(@hasExecuted == false and File::directory?(@fileName))
-            Dir::delete(@fileName)
-            @hasExecuted=true
-        end
-    end
-
-    # This method will recreate the chosen directory if the directory does not exist
-    # and the command has not already been undone
-    def undo 
-        if(@hasExecuted == true and (not File::directory?(@fileName)))
-            Dir::mkdir(@fileName)
-            @hasExecuted=false
-        end
+        # Given /testData/dir this will produce /testData/.dirTrash
+        # This allows the "deletion" of the folder by moving it to a hidden folder for the time being 
+        super(n, "#{File.dirname(n)}/.#{File.basename(n)}Trash")
     end
 end
